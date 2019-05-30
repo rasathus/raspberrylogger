@@ -1,0 +1,1 @@
+--input /home/pi/rivetracing/car/trunk/data/F3.RUN --output /home/pi/race_logs/output.tmp --use_display

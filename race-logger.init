@@ -1,0 +1,49 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          race-logger
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon for Race Logger
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+app_path='/home/pi/rivetracing/car/trunk/src/'
+startup_args='--input /home/pi/rivetracing/car/trunk/data/F3.RUN --output /home/pi/race_logs/output.tmp --use_display'
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting Race Logger ..."
+    /usr/bin/python ${app_path}/race-logger.py ${startup_args} > /dev/null 2>&1 &
+    pid=$!
+    echo $pid > /var/run/race-logger.pid
+    ;;
+  stop)
+    echo "Stopping Race Logger ..."
+    if [ -e /var/run/race-logger.pid ]; then
+        /bin/kill -s sigterm $(cat /var/run/race-logger.pid)
+        /bin/rm /var/run/race-logger.pid
+    fi
+    ;;
+  restart)
+    echo "Restarting Race Logger ..."
+    echo "Stopping Race Logger ..."
+    if [ -e /var/run/race-logger.pid ]; then
+      /bin/kill -s sigterm $(cat /var/run/race-logger.pid)
+      /bin/rm /var/run/race-logger.pid
+    fi
+    sleep 1
+    echo "Starting Race Logger ..."
+    /usr/bin/python ${app_path}/race-logger.py ${startup_args} > /dev/null 2>&1 &
+    pid=$!
+    echo $pid > /var/run/race-logger.pid
+    ;;
+  *)
+    echo "Usage: /etc/init.d/race-logger {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
